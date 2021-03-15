@@ -404,7 +404,7 @@ be advised that this is modifying a design principle of the Linux distribution.
 
 ## `kubeadm upgrade plan` prints out `context deadline exceeded` error message
 
-This error message is shown when upgrading a Kubernetes cluster with `kubeadm` in the case of running an external etcd. This is not a critical bug and happens because older versions of kubeadm perform a version check on the external etcd cluster. You can proceed with `kubeadm upgrade apply ...`. 
+This error message is shown when upgrading a Kubernetes cluster with `kubeadm` in the case of running an external etcd. This is not a critical bug and happens because older versions of kubeadm perform a version check on the external etcd cluster. You can proceed with `kubeadm upgrade apply ...`.
 
 This issue is fixed as of version 1.19.
 
@@ -415,3 +415,14 @@ If `/var/lib/kubelet` is being mounted, performing a `kubeadm reset` will effect
 To workaround the issue, re-mount the `/var/lib/kubelet` directory after performing the `kubeadm reset` operation.
 
 This is a regression introduced in kubeadm 1.15. The issue is fixed in 1.20.
+
+## Cannot use the metrics-server securely in a kubeadm cluster
+
+In a kubeadm cluster, the [metrics-server](https://github.com/kubernetes-sigs/metrics-server)
+can be used insecurely by passing the `--kubelet-insecure-tls` to it. In most cases this is not recommended.
+
+See [Enabling signed kubelet serving certificates](/docs/tasks/administer-cluster/kubeadm/kubeadm-certs#kubelet-serving-certs)
+to understand how to configure the kubelets
+in a kubeadm cluster to have signed serving certificates.
+
+Also see [How to run the metrics-server securely](https://github.com/kubernetes-sigs/metrics-server/blob/master/FAQ.md#how-to-run-metrics-server-securely).
