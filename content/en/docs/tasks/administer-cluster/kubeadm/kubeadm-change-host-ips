@@ -1,0 +1,71 @@
+---
+reviewers:
+- sig-cluster-lifecycle
+title: Changing kubeadm host IP addresses
+content_type: task
+weight: 35
+---
+
+<!-- overview -->
+
+kubeadm does not support automated ways of change the IP address of a control plane node,
+worker node, or the IP address of a load balancer that balances the deployed
+kube-apiservers on control plane nodes. At the same time, kubeadm does hardcode such
+IP addresses in a number of locations.
+
+This guide shows the correct sequence of steps that need to be performed
+to achieve the reconfiguration of such IP addresses.
+
+{{< warning >}}
+This guide includes sensitive steps that may introduce prologued cluster downtime
+if not executed correctly. In some situations minimal downtime may not be avoidable.
+Updating IP addresses of the cluster load balancer or control plane nodes is not a recommended
+action and should be avoided if possible.
+{{< /warning >}}
+
+## {{% heading "prerequisites" %}}
+
+- You need a cluster that was deployed using kubeadm.
+- Have a text editor installed on all hosts and experted as `KUBE_EDITOR`.
+- Have terminal connectivity to all hosts in the cluster with SSH or another method.
+- Get familiar with kubeadm's
+[Implementation details](/docs/reference/setup-tools/kubeadm/implementation-details).
+- Get familiar with
+[Reconfiguring a kubeadm cluster](/docs/tasks/administer-cluster/kubeadm/kubeadm-reconfigure).
+- Get familiar with
+[Options for Highly Available Topology](/docs/setup/production-environment/tools/kubeadm/ha-topology).
+
+<!-- steps -->
+
+## Changing cluster IP addresses
+
+### Updating the IP of worker node
+
+A worker node deployed by kubeadm only has a kubelet running and no control plane components.
+To update the IP of such a worker node host, first you need to establish if the kubelet
+was configured with a custom `--node-ip` flag. This flag allows overriding what IPv4/IPv6
+addresses will be used for this node in the cluster. If the flag is not provided the kubelet
+will try to detect
+[usable IPs from default routes](/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#network-setup)
+on the host.
+
+To check if `--node-ip` is used try to find it in the file `/var/lib/kubelet/kubeadm-flags.env`.
+Normally this flag would come from `JoinConfiguration.nodeRegistration.kubeletExtraArgs` when
+your are calling `kubeadm join`.
+
+### If the flag is used
+
+- Make sure the node is first drained. Execute the command `kubectl drain <worker-node-name>`
+- Edit `/var/lib/kubelet/kubeadm-flags.env` and place a new value after `--node-ip`.
+- Call `systemctl restart kubelet`.
+
+###
+
+####
+
+## {{% heading "whatsnext" %}}
+
+- [Upgrading kubeadm clusters](/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade)
+- [Customizing components with the kubeadm API](/docs/setup/production-environment/tools/kubeadm/control-plane-flags)
+- [Certificate management with kubeadm](/docs/tasks/administer-cluster/kubeadm/kubeadm-certs)
+- [Find more about kubeadm set-up](/docs/reference/setup-tools/kubeadm/)
